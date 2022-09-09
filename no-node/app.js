@@ -28,18 +28,20 @@ const app = Vue.createApp({
       mostVisitedEndpoint: "/",
       averageRequestCountPerIp: 1,
       totalResponsesCount: 1,
+      ipMostRequests: "0.0.0.0",
+      ipMostRequestsCount: 0,
     }
   },
   mounted() {
     axios.get(requests_base_url+"/requests/all/count").then(response=>(this.totalResponsesCount=response.data.data[0]));
     axios.get(requests_base_url+"/responses/http-good/all/count")
-         .then(response =>(this.goodResponsesTotalCount = response.data.data[0]));
+                        .then(response =>(this.goodResponsesTotalCount = response.data.data[0]));
     axios.get(requests_base_url)
-         .then(response =>(this.backendName = response.data.app_name));
+                         .then(response =>(this.backendName = response.data.app_name));
     axios.get(requests_base_url+"/responses/http-redirect/all/count")
-         .then(response =>(this.redirectResponsesTotalCount = response.data.data[0]));
+                         .then(response =>(this.redirectResponsesTotalCount = response.data.data[0]));
     axios.get(requests_base_url+"/responses/http-error-client/all/count")
-         .then(response =>(this.errorClientResponsesTotalCount = response.data.data[0]));
+                         .then(response =>(this.errorClientResponsesTotalCount = response.data.data[0]));
     axios.get(requests_base_url+"/responses/http-error-server/all/count")
          .then(response =>(this.errorServerResponsesTotalCount = response.data.data[0]));
     axios.get(requests_base_url+"/requests/bots/count")
@@ -50,5 +52,7 @@ const app = Vue.createApp({
          .then(response =>(this.averageRequestCountPerIp = response.data.data[0]));
     axios.get(requests_base_url+"/requests/bots/count")
          .then(response =>(this.mostVisitedEndpoint = response.data.data[0]));
+    axios.get(requests_base_url+"/requests/count/most-requests")
+         .then(response =>{this.ipMostRequests = response.data.data[0]; this.ipMostRequestsCount = response.data.data[1]});
   }
 })

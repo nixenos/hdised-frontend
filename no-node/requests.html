@@ -19,6 +19,7 @@
         integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ==" 
         crossorigin="anonymous"/>
    <script src="https://unpkg.com/vue@3"></script>
+   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
    <script src="./app.js"></script>
   </head>
   <body>
@@ -26,7 +27,7 @@
             <nav class="navbar w-full bg-white">
             <div class="container-lg px-0">
                 <div class="flex w-full items-center">
-                    <a class="nav-brand mr-auto ml-0" href="index.html">NGINX log data explorer for {{backendName}}</a>
+                    <a class="nav-brand mr-auto ml-0" href="index.html">{{backendName}}</a>
                 </div>
                 <div class="collapse navbar-collapse" navbar-menu="">
                 <ul class="navbar-nav">
@@ -52,29 +53,89 @@
                 </div>
             </div>
         </nav>
-        <div class="relative flex min-h-screen flex-col justify-center overflow-hidden bg-white py-6 sm:py-12" style="background: #edf2f7;">
-           <div class="mx-auto max-w-4xl rounded-3xl bg-[#092540] p-20 text-center" style="background: #09054d;">
-               <h2 class="text-5xl font-bold leading-tight text-white">Real-time analysis of NGINX logs</h2>
-               <p class="mt-5 text-xl leading-8 text-white">Up-to-date data about your website: most visited endpoints, human/bot requests statistics, responses statistics and more!</p>
-               <div class="mt-6 flex items-center justify-center gap-4">
-                   <button class="flex items-center justify-center gap-2 rounded-full bg-violet-500 px-5 py-3 text-lg font-medium text-white">
-                       <span> See server statistics</span>
-                       <span
-                           ><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                               <path d="M6.00156 13.4016L4.60156 12.0016L8.60156 8.00156L4.60156 4.00156L6.00156 2.60156L11.4016 8.00156L6.00156 13.4016Z" fill="white" /></svg
-                                                                                                                                                                              ></span>
-                   </button>
-                   <button class="flex items-center justify-center gap-2 rounded-full border border-white/50 px-5 py-3 text-lg font-medium text-white">
-                       <span> See data about clients</span>
-                       <span
-                           ><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                               <path d="M6.00156 13.4016L4.60156 12.0016L8.60156 8.00156L4.60156 4.00156L6.00156 2.60156L11.4016 8.00156L6.00156 13.4016Z" fill="white" /></svg
-                                                                                                                                                                              ></span>
-                   </button>
-               </div>
-           </div>
+        <section class="py-1 bg-blueGray-50">
+<div class="w-full xl:w-8/12 mb-12 xl:mb-0 px-4 mx-auto mt-24">
+  <div class="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded ">
+    <div class="rounded-t mb-0 px-4 py-3 border-0">
+      <div class="flex flex-wrap items-center">
+        <div class="relative w-full px-4 max-w-full flex-grow flex-1">
+          <h3 class="font-semibold text-base text-blueGray-700">Requests statistics</h3>
         </div>
+        <div class="relative w-full px-4 max-w-full flex-grow flex-1 text-right">
+          <button class="bg-indigo-500 text-white active:bg-indigo-600 text-xs font-bold uppercase px-3 py-1 rounded outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150" type="button">See all</button>
+        </div>
+      </div>
     </div>
+
+    <div class="block w-full overflow-x-auto">
+      <table class="items-center bg-transparent w-full border-collapse ">
+        <thead>
+          <tr>
+            <th class="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
+                          Request type
+                        </th>
+          <th class="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
+                          Requests count
+                        </th>
+           <th class="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
+                          Percentage of total
+                        </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <th class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left text-blueGray-700 ">
+              Human requests
+            </th>
+            <td class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 ">
+                <p>{{ humanRequests }}</p>
+            </td>
+            <td class="border-t-0 px-6 align-center border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
+              {{ humanRequests/totalResponsesCount * 100 }}%
+            </td>
+          </tr>
+          <tr>
+            <th class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left text-blueGray-700">
+              Bot requests
+            </th>
+            <td class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
+              {{ botRequests }}
+            </td>
+            <td class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
+              {{ botRequests/totalResponsesCount * 100 }}%
+            </td>
+          </tr>
+          <tr>
+            <th class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left text-blueGray-700">
+              IP with most requests - IP - count of IP requests
+            </th>
+            <td class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
+              {{ ipMostRequests }}
+            </td>
+            <td class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
+              {{ ipMostRequestsCount }}
+            </td>
+          </tr>
+          <tr>
+            <th class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left text-blueGray-700">
+              HTTP500 (server error)
+            </th>
+            <td class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
+              {{ errorServerResponsesTotalCount }}
+            </td>
+            <td class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
+              {{ errorServerResponsesTotalCount/totalResponsesCount * 100 }}%
+            </td>
+          </tr>
+        </tbody>
+
+      </table>
+    </div>
+  </div>
+</div>
+        </section>
+      </div>
     <script>
       const mountedApp = app.mount("#app");
     </script>
